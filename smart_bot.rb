@@ -1,3 +1,5 @@
+require 'timeout'
+
 class SmartBot < Bot
   
   def process_message(message)
@@ -35,10 +37,17 @@ class SmartBot < Bot
   def get_random_sentence(paragraphs, subject)
     paragraph = ""
     sentence = ""
-    until /#{subject}/i.match(sentence) and paragraph.length > 50
-      paragraph = paragraphs.sample
-      sentence = paragraph.split(". ").sample || ""
+    begin 
+      Timeout::timeout(5) {
+        until /#{subject}/i.match(sentence) and paragraph.length > 50
+          paragraph = paragraphs.sample
+          sentence = paragraph.split(". ").sample || ""
+        end
+      }
+    rescue
+      sentence = "I don't know anything about that."
     end
+    
     sentence
   end  
 end
