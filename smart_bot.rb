@@ -1,4 +1,5 @@
 require 'timeout'
+require 'pry'
 
 class SmartBot < Bot
   
@@ -18,12 +19,21 @@ class SmartBot < Bot
   def get_fact(subject)
     @wiki_conn = Faraday.new(:url => 'http://en.wikipedia.org')
     res = get_wiki_page(subject)
-    response_hash = JSON.parse(res.body)
-    content = response_hash["query"]["pages"].map {|key,val| val['extract']}.join
+    query_hash = JSON.parse(res.body)['query']
+    target = get_target(query_hash, subject)
+    content = query_hash["pages"].map {|key,val| val['extract']}.join
     paragraphs = content.split("\n")
-    get_random_sentence(paragraphs, subject)
+    get_random_sentence(paragraphs, target)
   end
 
+  def get_target(query_hash, subject)
+    if query_hash.has_key?('redirects')
+      query_hash['redirects'].first['to']
+    else
+      subject  
+    end
+  end
+  
   def get_wiki_page(subject)
     @wiki_conn.get '/w/api.php', {
       :action => 'query',
