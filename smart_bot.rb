@@ -1,11 +1,16 @@
 class SmartBot < Bot
   
   def process_message(message)
-    sentences = message['content'].split(". ")
-    sentences.each do |sentence|
-      subjects =  sentence.scan(/tell me about (.+)/i)
-      subjects.flatten.each { |subject| get_fact(subject) }
-    end
+    subjects = message['content'].scan(/tell me about ([^\.]+)/i)
+    puts 'sub'
+    puts subjects
+    facts = subjects.flatten.map { |subject| get_fact(subject) }
+    puts 'fat'
+    puts facts
+    puts message
+    puts 'email'
+    puts message['sender_email']
+    send_messages('private', message['sender_email'], facts)
   end
 
   def get_fact(subject)
@@ -14,8 +19,7 @@ class SmartBot < Bot
     response_hash = JSON.parse(res.body)
     content = response_hash["query"]["pages"].map {|key,val| val['extract']}.join
     paragraphs = content.split("\n")
-    sentence = find_sentence(paragraphs, subject)
-    send_message('private', 'wrchapin@gmail.com', sentence)
+    get_random_sentence(paragraphs, subject)
   end
 
   def get_wiki_page(subject)
@@ -28,7 +32,7 @@ class SmartBot < Bot
       :redirects => ''}
   end
 
-  def find_sentence(paragraphs, subject)
+  def get_random_sentence(paragraphs, subject)
     paragraph = ""
     sentence = ""
     until /#{subject}/i.match(sentence) and paragraph.length > 50
