@@ -1,8 +1,6 @@
 require 'timeout'
 require 'pry'
 
-# fix ratio!!!!!!
-
 class SmartBot < Bot
 
   THRESHOLD = 2
@@ -80,7 +78,11 @@ class SmartBot < Bot
     freq_hash = variants.map {|v| { v => get_frequency(v, paragraphs) } }.reduce {|i,h| i.merge(h)}
     winning_variant = Hash[*freq_hash.max_by {|k,v| v}]
     subj_freq = freq_hash.select {|k,v| k == subject }
-    ratio = winning_variant.values.first/subj_freq.values.first
+    begin
+      ratio = winning_variant.values.first/subj_freq.values.first
+    rescue
+      ratio  = THRESHOLD + 1
+    end
     ratio > THRESHOLD ? winning_variant : subj_freq 
   end
 
