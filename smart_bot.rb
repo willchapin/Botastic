@@ -9,14 +9,7 @@ class SmartBot < Bot
   
   def process_message(message)
     subjects = message['content'].scan(/tell me about ([^\.]+)/i)
-    puts 'sub'
-    puts subjects
     facts = subjects.flatten.map { |subject| get_fact(subject) }
-    puts 'fat'
-    puts facts
-    puts message
-    puts 'email'
-    puts message['sender_email']
     send_messages('private', message['sender_email'], facts)
   end
 
