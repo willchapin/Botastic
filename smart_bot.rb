@@ -6,11 +6,20 @@ class SmartBot < Bot
   THRESHOLD = 2
   
   def process_message(message)
-    subjects = message['content'].scan(/tell me about ([^\.]+)/i)
-    facts = subjects.flatten.map { |subject| get_fact(subject) }
+    subjects = get_subjects(message)
+    facts = subjects.map { |subject| get_fact(subject) }
     send_messages('private', message['sender_email'], facts)
   end
 
+  def get_subjects(message)
+    subjects =  message['content'].scan(/tell me about ([^\.]+)/i).flatten
+    remove_prefix(subjects, 'the ')
+  end
+
+  def remove_prefix(strings, prefix)
+    strings.map { |s| s.sub(/#{prefix}/i, "") }
+  end
+  
   def get_fact(subject)
     @wiki_conn = Faraday.new(:url => 'http://en.wikipedia.org')
     res = get_wiki_page(subject)
