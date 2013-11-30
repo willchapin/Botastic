@@ -11,20 +11,19 @@ class SmartBot < Bot
   end
   
   def process_message(message)
-    puts message
-    @subject = get_subjects(message).first
+    @subject = get_subject(message)
      if @subject
       send_message('private', message['sender_email'], get_fact)
     end
   end
 
-  def get_subjects(message)
-    subjects =  message['content'].scan(/tell me about ([^\.]+)/i).flatten
-    remove_prefix(subjects, 'the ')
+  def get_subject(message)
+    subject = message['content'].scan(/tell me about ([^\.]+)/i).flatten.first
+    remove_prefix(subject, 'the ') if subject
   end
 
-  def remove_prefix(strings, prefix)
-    strings.map { |s| s.sub(/#{prefix}/i, "") }
+  def remove_prefix(string, prefix)
+    string.sub(/#{prefix}/i, "")
   end
   
   def get_fact
@@ -32,7 +31,7 @@ class SmartBot < Bot
     change_subject_if_redirect(query_hash)
     page = WikiPage.new(get_content(query_hash))
     set_variants
-    page.get_sentence(@variants)
+    page.get_sentence(@variants, @subject)
   end
 
   def get_query_hash
@@ -64,9 +63,8 @@ class SmartBot < Bot
     @variants << acronym if @variants.length > 1
     @variants << @subject
   end
-
+  
   def acronym
     @variants.map { |str| str[0]}.join("").upcase
-  end
-  
+  end  
 end

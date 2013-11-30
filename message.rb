@@ -26,8 +26,8 @@ class WikiPage
     end
   end
   
-  def get_sentence(variants)
-    subject = get_final_subject(variants).keys.first
+  def get_sentence(variants, original_subject)
+    subject = get_final_subject(variants, original_subject)
     timed_get_sentence(subject)
   end
   
@@ -48,6 +48,18 @@ class WikiPage
     content[0..100].match(/refer to.*:/)
   end
 
+  def get_final_subject(variants, original_subject)
+    freq_hash = make_freq_hash(variants)   
+    winning_variant = freq_hash.max_by { |k,v| v }
+    subj_freq = original_subject_freq(freq_hash, original_subject)
+    begin
+      ratio = winning_variant.last/subj_freq.last
+    rescue
+      ratio  = THRESHOLD + 1
+    end
+    ratio > THRESHOLD ? winning_variant.first : subj_freq.first
+  end
+
   def get_final_subject(variants)
     freq_hash = variants.map {|v| { v => get_frequency(v) } }.reduce {|i,h| i.merge(h)}
     winning_variant = Hash[*freq_hash.max_by {|k,v| v}]
@@ -57,6 +69,19 @@ class WikiPage
     rescue
       ratio  = THRESHOLD + 1
     end
-    ratio > THRESHOLD ? winning_variant : subj_freq 
+    ratio > THRESHOLD ? winning_variant : subj_freq
   end
+
+  
+
+  def make_freq_hash(array)
+    array.reduce({}) do |hash, v|
+      hash.merge(v => get_frequency(v))
+    end
+  end
+
+  def original_subject_freq(freq_hash, original_subject)
+    freq_hash.select {|k,v| k == original_subject }.to_a.flatten
+  end
+  
 end
