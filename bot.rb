@@ -54,23 +54,9 @@ class Bot
    # puts message
   end
 
-  def send_messages(type, to, messages, subject = "")
-    puts 'plural'
-    puts type
-    puts to
-    puts messages
-    puts subject
-    messages.each { |message| send_message(type, to, message, subject) }
-  end
-  
-  def send_message(type, to, content = "", subject = "")
-    puts 'single'
-    puts type
-    puts to
-    puts content
-    puts subject
+  def send_message(type, to, message, subject = "")
     @conn.post '/v1/messages', { :type => type,
-                                 :content => content, 
+                                 :content => message, 
                                  :to => to,
                                  :subject => subject}
   end

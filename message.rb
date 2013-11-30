@@ -1,5 +1,6 @@
 class WikiPage
 
+  THRESHOLD = 2
 
   attr_accessor :content, :paragraphs
   
@@ -19,14 +20,19 @@ class WikiPage
   
   def timed_get_sentence(subject)
     begin
-      Timeout::timeout(5) { sentence =  get_sentence(subject) }
+      Timeout::timeout(5) { sentence = get_final_sentence(subject) }
     rescue
       sentence = "I don't know anything about that."
     end
     sentence
   end
 
-  def get_sentence(subject)
+  def get_sentence(variants)
+    subject = get_final_subject(variants).keys.first
+    timed_get_sentence(subject)
+  end
+  
+  def get_final_sentence(subject)
     until /#{subject}/i.match(sentence)
       paragraph = @paragraphs.sample
       sentence = paragraph.split(". ").sample || ""
@@ -34,23 +40,8 @@ class WikiPage
     sentence
   end
   
-
-    words = subject.split(" ")
-    long_paragraphs = filter_paragraphs(50)
-    if words.length > 1
-      variants = get_variants(words, subject)
-      target = get_final_subject(variants, long_paragraphs, subject).keys.first
-    else
-      target = subject
-    end
-    
-
-
-  
-
-  
-  def get_frequency(word, paragraphs)
-    occurrences = paragraphs.map {|p| p.scan(/#{word}/).length }
+  def get_frequency(word)
+    occurrences = @paragraphs.map {|p| p.scan(/#{word}/).length }
     occurrences.reduce(:+)
   end
  
@@ -58,4 +49,15 @@ class WikiPage
     content[0..100].match(/refer to.*:/)
   end
 
+  def get_final_subject(variants)
+    freq_hash = variants.map {|v| { v => get_frequency(v) } }.reduce {|i,h| i.merge(h)}
+    winning_variant = Hash[*freq_hash.max_by {|k,v| v}]
+    subj_freq = freq_hash.select {|k,v| k == @subject }
+    begin
+      ratio = winning_variant.values.first/subj_freq.values.first
+    rescue
+      ratio  = THRESHOLD + 1
+    end
+    ratio > THRESHOLD ? winning_variant : subj_freq 
+  end
 end
