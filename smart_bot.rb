@@ -3,6 +3,8 @@ require 'pry'
 
 class SmartBot < Bot
 
+  attr_accessor :subject
+  
   def initialize
     @wiki_conn = Faraday.new(:url => 'http://en.wikipedia.org')
     super
