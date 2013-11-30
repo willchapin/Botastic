@@ -42,7 +42,7 @@ class SmartBot < Bot
     @wiki_conn.get '/w/api.php', {
       :action => 'query',
       :prop => 'extracts',
-      :format => 'json',
+      :format => 'xml',
       :explaintext => '',
       :titles => subject,
       :redirects => ''}
@@ -67,6 +67,7 @@ class SmartBot < Bot
         end
       }
     rescue
+      
       sentence = "I don't know anything about that."
     end
     
@@ -95,4 +96,8 @@ class SmartBot < Bot
     ratio > THRESHOLD ? winning_variant : subj_freq 
   end
 
+  def is_disambiguation?(content)
+    content[0..100].match(/refer to.*:/)
+  end
+  
 end
