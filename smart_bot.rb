@@ -9,9 +9,11 @@ class SmartBot < Bot
   end
   
   def process_message(message)
+    puts message
     @subject = get_subjects(message).first
-    fact = get_fact
-    send_message('private', message['sender_email'], fact)
+     if @subject
+      send_message('private', message['sender_email'], get_fact)
+    end
   end
 
   def get_subjects(message)
@@ -66,4 +68,3 @@ class SmartBot < Bot
   end
   
 end
-

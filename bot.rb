@@ -29,9 +29,15 @@ class Bot
       while true
         res = get_events
         events = parse_response(res)
-        messages = events.select {|event| event["type"] == "message"}
+        messages = filter_events(events)
         process_messages(messages)
       end
+    end
+  end
+
+  def filter_events(events)
+    events.select do |event|
+      event["type"] == "message" &&  event["message"]["sender_email"] != EMAIL
     end
   end
 
@@ -47,7 +53,7 @@ class Bot
   end
   
   def process_messages(messages)
-    messages.each {|message| process_message(message['message']) }
+    messages.each { |message| process_message(message['message']) }
   end
 
   def process_message(message)
