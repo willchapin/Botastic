@@ -5,9 +5,9 @@ class SmartBot < Bot
 
   attr_accessor :subject
   
-  def initialize
+  def initialize(config)
     @wiki_conn = Faraday.new(:url => 'http://en.wikipedia.org')
-    super
+    super(config)
   end
   
   def process_message(message)

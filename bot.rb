@@ -4,14 +4,13 @@ require 'open-uri'
 
 class Bot
   
-  EMAIL = 'botastic-bot@students.hackerschool.com'
-  KEY = '8mnr2NGZbmDNrm7laiDrgMmi51RRW0dW'
-
-  def initialize
+  def initialize(config)
+    @email = config[:email]
+    @key = config[:key]
     @queue_id = nil
     @last_event_id = nil
     @conn = Faraday.new(:url => 'https://api.zulip.com')
-    @conn.basic_auth(EMAIL, KEY)
+    @conn.basic_auth(@email, @key)
     register_queue
     process_events!
   end
@@ -37,7 +36,7 @@ class Bot
 
   def filter_events(events)
     events.select do |event|
-      event["type"] == "message" &&  event["message"]["sender_email"] != EMAIL
+      event["type"] == "message" &&  event["message"]["sender_email"] != @email
     end
   end
 
