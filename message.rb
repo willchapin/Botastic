@@ -60,19 +60,6 @@ class WikiPage
     ratio > THRESHOLD ? winning_variant.first : subj_freq.first
   end
 
-  def get_final_subject(variants)
-    freq_hash = variants.map {|v| { v => get_frequency(v) } }.reduce {|i,h| i.merge(h)}
-    winning_variant = Hash[*freq_hash.max_by {|k,v| v}]
-    subj_freq = freq_hash.select {|k,v| k == @subject }
-    begin
-      ratio = winning_variant.values.first/subj_freq.values.first
-    rescue
-      ratio  = THRESHOLD + 1
-    end
-    ratio > THRESHOLD ? winning_variant : subj_freq
-  end
-
-  
 
   def make_freq_hash(array)
     array.reduce({}) do |hash, v|
